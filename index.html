@@ -4,82 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="data:,">
-    <title>Music Streamer</title>
+    <title>Streamer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-primary: #ffffff;
-            --text-secondary: #aaaaaa;
-            --accent: #1db954;
+            /* Ruby on Rails & New Yorker Palette */
+            --bg-color: #FAFAF9;       /* Creamy paper background */
+            --text-primary: #121212;   /* Ink black */
+            --text-secondary: #555555; /* Pencil gray */
+            --accent: #CC0000;         /* Rails Red */
+            --border-color: #121212;   /* Sharp borders */
+            --card-bg: #FFFFFF;        /* Pure white cards */
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        body { background-color: var(--bg-color); color: var(--text-primary); padding-bottom: 120px; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-primary); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding-bottom: 140px; 
+        }
+
+        h1, h2, h3 { font-family: 'Merriweather', serif; }
 
         /* Header */
         header {
             padding: 20px;
             position: sticky;
             top: 0;
-            background-color: rgba(18, 18, 18, 0.95);
-            backdrop-filter: blur(10px);
+            background-color: rgba(250, 250, 249, 0.98);
+            border-bottom: 2px solid var(--border-color);
             z-index: 100;
-            border-bottom: 1px solid #333;
         }
 
-        .search-container { display: flex; gap: 10px; max-width: 600px; margin: 0 auto; }
+        .brand {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-style: italic;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .search-container { display: flex; gap: 0; max-width: 600px; margin: 0 auto; border: 2px solid var(--border-color); border-radius: 4px; overflow: hidden; }
         
         input[type="text"] {
             flex-grow: 1;
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 12px 15px;
             border: none;
-            background-color: #333;
-            color: white;
+            background-color: white;
+            color: var(--text-primary);
             font-size: 16px;
             outline: none;
+            font-family: 'Merriweather', serif;
         }
 
         button.search-btn {
-            background-color: var(--accent);
-            color: black;
+            background-color: var(--text-primary);
+            color: white;
             border: none;
-            padding: 0 20px;
-            border-radius: 25px;
+            padding: 0 25px;
             font-weight: bold;
             cursor: pointer;
-            transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.2s;
         }
         
-        button.search-btn:disabled, input[type="text"]:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        button.search-btn:hover { background-color: var(--accent); }
 
         /* Results List */
-        .results { max-width: 600px; margin: 20px auto; padding: 0 10px; }
+        .results { max-width: 600px; margin: 30px auto; padding: 0 15px; }
         
         .track-card {
             display: flex;
             align-items: center;
             background-color: var(--card-bg);
-            margin-bottom: 12px;
-            padding: 10px;
-            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-left: 4px solid transparent;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: all 0.2s;
         }
 
-        .track-card:active { transform: scale(0.98); }
+        .track-card:hover { border-color: var(--text-primary); transform: translateX(5px); }
+        .track-card.playing { border-left: 4px solid var(--accent); background-color: #fff0f0; }
 
-        .track-img { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; margin-right: 15px; background: #333; }
+        .track-img { width: 50px; height: 50px; object-fit: cover; margin-right: 15px; border: 1px solid #eee; }
         
         .track-info { flex-grow: 1; overflow: hidden; }
-        .track-title { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-        .track-artist { font-size: 13px; color: var(--text-secondary); }
-        .track-duration { font-size: 12px; color: var(--text-secondary); margin-left: 10px; }
+        .track-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; font-family: 'Merriweather', serif; }
+        .track-artist { font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .track-duration { font-size: 12px; font-weight: bold; margin-left: 10px; }
 
         /* Bottom Player */
         .player-bar {
@@ -87,55 +105,58 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #282828;
-            padding: 15px;
-            border-top: 1px solid #333;
+            background-color: white;
+            padding: 15px 20px;
+            border-top: 3px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             z-index: 200;
             transform: translateY(100%);
             transition: transform 0.3s ease-out;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
 
         .player-bar.active { transform: translateY(0); }
 
-        .player-info { display: flex; align-items: center; width: 60%; }
-        .player-img { width: 50px; height: 50px; border-radius: 4px; margin-right: 12px; background: #333; }
+        .player-info { display: flex; align-items: center; width: 40%; }
         .player-text { overflow: hidden; }
-        .player-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .player-artist { font-size: 12px; color: var(--text-secondary); }
+        .player-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Merriweather', serif; }
+        .player-artist { font-size: 11px; color: var(--accent); font-weight: bold; text-transform: uppercase; }
 
-        .controls { display: flex; align-items: center; gap: 15px; }
+        .controls { display: flex; align-items: center; gap: 8px; }
         
-        .play-btn {
-            width: 45px;
-            height: 45px;
+        .btn-ctrl {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--border-color);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background-color: white;
-            color: black;
-            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 16px;
+            transition: all 0.2s;
         }
+
+        .btn-ctrl:hover { background-color: var(--border-color); color: white; }
+        .btn-ctrl.active { background-color: var(--accent); border-color: var(--accent); color: white; }
+
+        .play-btn { width: 50px; height: 50px; font-size: 20px; }
         
-        /* Loading Spinner for Play Button */
-        .play-btn-loading {
-            /* Mimics the .loader spin animation, adjusted for the button size */
-            border: 3px solid #333;
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+        /* New Action Buttons (Download) */
+        .btn-action {
+             border-radius: 4px;
+             width: auto;
+             padding: 0 10px;
+             font-size: 14px;
         }
 
         /* Loading Spinner */
         .loader {
-            border: 3px solid #333;
+            border: 3px solid #eee;
             border-top: 3px solid var(--accent);
             border-radius: 50%;
             width: 30px;
@@ -153,8 +174,9 @@
 <body>
 
     <header>
+        <div class="brand">The Daily Streamer</div>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search song or artist..." onkeypress="handleEnter(event)">
+            <input type="text" id="searchInput" placeholder="Search Artist, Album, or Mood..." onkeypress="handleEnter(event)">
             <button class="search-btn" id="searchButton" onclick="performSearch()">Go</button>
         </div>
     </header>
@@ -164,14 +186,21 @@
 
     <div class="player-bar" id="playerBar">
         <div class="player-info">
-            <img id="currentArt" src="" class="player-img">
             <div class="player-text">
                 <div class="player-title" id="currentTitle">Not Playing</div>
                 <div class="player-artist" id="currentArtist">Select a song</div>
             </div>
         </div>
         <div class="controls">
-            <button class="play-btn" id="playPauseBtn" onclick="togglePlay()" disabled>▶</button>
+            <button class="btn-ctrl btn-action" onclick="downloadCurrent()" title="Download Song">⬇</button>
+            
+            <button class="btn-ctrl" id="repeatBtn" onclick="toggleRepeat()" title="Repeat One">↻</button>
+            
+            <button class="btn-ctrl" onclick="playPrevious()" title="Previous Song">⇤</button>
+
+            <button class="btn-ctrl play-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+            
+            <button class="btn-ctrl" onclick="playNext()" title="Next Song">⇥</button>
         </div>
     </div>
 
@@ -180,20 +209,17 @@
     <script>
         const audio = document.getElementById('audioPlayer');
         const playPauseBtn = document.getElementById('playPauseBtn');
+        const repeatBtn = document.getElementById('repeatBtn');
         const playerBar = document.getElementById('playerBar');
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
         const loader = document.getElementById('loader');
         const resultsDiv = document.getElementById('resultsList');
         
-        // --- NEW: Remove the loading indicator after the browser can play the media ---
-        function handleCanPlay() {
-            playPauseBtn.disabled = false;
-            // Restore the play/pause icon based on the audio state
-            playPauseBtn.innerHTML = audio.paused ? '▶' : '⏸';
-            playPauseBtn.classList.remove('play-btn-loading');
-            audio.removeEventListener('canplay', handleCanPlay);
-        }
+        // State
+        let currentQueue = [];
+        let currentIndex = -1;
+        let isRepeat = false;
 
         function handleEnter(e) {
             if (e.key === 'Enter') performSearch();
@@ -201,15 +227,13 @@
 
         async function performSearch() {
             const query = searchInput.value;
-            
             if (!query) return;
 
-            // 2. Performance Improvement: Set loading state immediately (Visual Responsiveness)
             resultsDiv.innerHTML = '';
             loader.style.display = 'block';
             searchInput.disabled = true;
             searchButton.disabled = true;
-            searchInput.blur(); // Close mobile keyboard
+            searchInput.blur();
 
             try {
                 const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
@@ -217,20 +241,18 @@
                 
                 loader.style.display = 'none';
 
-                if (data.error) {
-                    resultsDiv.innerHTML = `<div style="text-align:center; color:red; margin-top:20px;">Error: ${data.error}</div>`;
-                    return;
-                }
-
-                if (data.length === 0) {
+                if (data.error || data.length === 0) {
                     resultsDiv.innerHTML = `<div style="text-align:center; color:gray; margin-top:20px;">No results found.</div>`;
                     return;
                 }
 
-                data.forEach(track => {
+                currentQueue = data;
+                
+                data.forEach((track, index) => {
                     const card = document.createElement('div');
                     card.className = 'track-card';
-                    card.onclick = () => playTrack(track);
+                    card.id = `card-${index}`;
+                    card.onclick = () => playTrack(index);
                     card.innerHTML = `
                         <img src="${track.thumbnail}" class="track-img" onerror="this.src='https://via.placeholder.com/60'">
                         <div class="track-info">
@@ -244,87 +266,110 @@
 
             } catch (err) {
                 loader.style.display = 'none';
-                resultsDiv.innerHTML = `<div style="text-align:center; color:red; margin-top:20px;">Connection Error</div>`;
                 console.error(err);
             } finally {
-                // Always reset UI state
                 searchInput.disabled = false;
                 searchButton.disabled = false;
             }
         }
 
-        function playTrack(track) {
-            // --- NEW: Immediately set loading state and disable button ---
-            playPauseBtn.disabled = true;
-            playPauseBtn.innerText = '';
-            playPauseBtn.classList.add('play-btn-loading');
-            audio.removeEventListener('canplay', handleCanPlay); // Clear existing listeners
-            audio.addEventListener('canplay', handleCanPlay); // Add new listener for current track
+        function playTrack(index) {
+            if (index < 0 || index >= currentQueue.length) return;
+
+            if (currentIndex !== -1) {
+                const oldCard = document.getElementById(`card-${currentIndex}`);
+                if (oldCard) oldCard.classList.remove('playing');
+            }
+            const newCard = document.getElementById(`card-${index}`);
+            if (newCard) newCard.classList.add('playing');
+
+            currentIndex = index;
+            const track = currentQueue[index];
 
             document.getElementById('currentTitle').innerText = track.title;
             document.getElementById('currentArtist').innerText = track.uploader;
-            document.getElementById('currentArt').src = track.thumbnail;
             playerBar.classList.add('active');
-            
+            playPauseBtn.innerText = '...'; 
+
             audio.src = `/stream?id=${track.id}`;
             
-            // The play promise will resolve quickly, but the actual playback depends on the stream.
-            // We rely on the 'canplay' event to know when the stream is ready.
             audio.play().then(() => {
-                // If it plays immediately (e.g., from cache), the 'canplay' listener will run
-                // and correctly set the '⏸' icon.
+                playPauseBtn.innerText = '⏸';
                 updateMediaSession(track);
+                
+                // Speculative Pre-fetch Next
+                if (index + 1 < currentQueue.length) {
+                    fetch(`/prefetch?id=${currentQueue[index + 1].id}`); 
+                }
             }).catch(e => {
                 console.error("Playback failed", e);
-                // On failure, re-enable and show play icon
-                playPauseBtn.disabled = false;
-                playPauseBtn.innerHTML = '▶';
-                playPauseBtn.classList.remove('play-btn-loading');
-                audio.removeEventListener('canplay', handleCanPlay);
-                alert("Could not play audio. Try a different track.");
+                playPauseBtn.innerText = '▶';
             });
         }
 
         function togglePlay() {
-            if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
+            if (audio.paused) audio.play();
+            else audio.pause();
+        }
+
+        function playNext() {
+            if (currentIndex + 1 < currentQueue.length) {
+                playTrack(currentIndex + 1);
             }
         }
 
-        // Media Session API for Lock Screen Controls
+        function playPrevious() {
+            if (currentIndex > 0) {
+                playTrack(currentIndex - 1);
+            }
+        }
+        
+        function downloadCurrent() {
+            if (currentIndex === -1 || !currentQueue[currentIndex]) {
+                alert("No song selected.");
+                return;
+            }
+            const track = currentQueue[currentIndex];
+            // Trigger download via new window/location
+            window.location.href = `/download?id=${track.id}&title=${encodeURIComponent(track.title)}`;
+        }
+
+        function toggleRepeat() {
+            isRepeat = !isRepeat;
+            if (isRepeat) {
+                repeatBtn.classList.add('active');
+            } else {
+                repeatBtn.classList.remove('active');
+            }
+        }
+
+        // --- Event Listeners ---
+        audio.addEventListener('ended', () => {
+            if (isRepeat) {
+                audio.currentTime = 0;
+                audio.play();
+            } else {
+                playNext();
+            }
+        });
+
+        audio.addEventListener('playing', () => { playPauseBtn.innerText = '⏸'; });
+        audio.addEventListener('pause', () => { playPauseBtn.innerText = '▶'; });
+
+        // Media Session API
         function updateMediaSession(track) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: track.title,
                     artist: track.uploader,
-                    artwork: [
-                        { src: track.thumbnail, sizes: '96x96', type: 'image/jpeg' },
-                        { src: track.thumbnail, sizes: '512x512', type: 'image/jpeg' }
-                    ]
+                    artwork: [{ src: track.thumbnail }]
                 });
-
-                navigator.mediaSession.setActionHandler('play', function() { audio.play(); });
-                navigator.mediaSession.setActionHandler('pause', function() { audio.pause(); });
+                navigator.mediaSession.setActionHandler('play', () => audio.play());
+                navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+                navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
+                navigator.mediaSession.setActionHandler('previoustrack', () => playPrevious());
             }
         }
-
-        // Keep button synced with audio state
-        audio.addEventListener('playing', () => { playPauseBtn.innerHTML = '⏸'; });
-        audio.addEventListener('pause', () => { playPauseBtn.innerHTML = '▶'; });
-        audio.addEventListener('ended', () => { playPauseBtn.innerHTML = '▶'; });
-        
-        // --- NEW: Handle errors during loading ---
-        audio.addEventListener('error', (e) => { 
-            console.error("Audio Load Error:", e);
-            playPauseBtn.disabled = false;
-            playPauseBtn.innerHTML = '▶';
-            playPauseBtn.classList.remove('play-btn-loading');
-            audio.removeEventListener('canplay', handleCanPlay);
-            alert("An error occurred while loading the audio stream.");
-        });
-
     </script>
 </body>
 </html>

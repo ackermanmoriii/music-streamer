@@ -121,6 +121,17 @@
             cursor: pointer;
             font-size: 20px;
         }
+        
+        /* Loading Spinner for Play Button */
+        .play-btn-loading {
+            /* Mimics the .loader spin animation, adjusted for the button size */
+            border: 3px solid #333;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
 
         /* Loading Spinner */
         .loader {
@@ -160,7 +171,7 @@
             </div>
         </div>
         <div class="controls">
-            <button class="play-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+            <button class="play-btn" id="playPauseBtn" onclick="togglePlay()" disabled>▶</button>
         </div>
     </div>
 
@@ -175,6 +186,15 @@
         const loader = document.getElementById('loader');
         const resultsDiv = document.getElementById('resultsList');
         
+        // --- NEW: Remove the loading indicator after the browser can play the media ---
+        function handleCanPlay() {
+            playPauseBtn.disabled = false;
+            // Restore the play/pause icon based on the audio state
+            playPauseBtn.innerHTML = audio.paused ? '▶' : '⏸';
+            playPauseBtn.classList.remove('play-btn-loading');
+            audio.removeEventListener('canplay', handleCanPlay);
+        }
+
         function handleEnter(e) {
             if (e.key === 'Enter') performSearch();
         }
@@ -234,20 +254,33 @@
         }
 
         function playTrack(track) {
+            // --- NEW: Immediately set loading state and disable button ---
+            playPauseBtn.disabled = true;
+            playPauseBtn.innerText = '';
+            playPauseBtn.classList.add('play-btn-loading');
+            audio.removeEventListener('canplay', handleCanPlay); // Clear existing listeners
+            audio.addEventListener('canplay', handleCanPlay); // Add new listener for current track
+
             document.getElementById('currentTitle').innerText = track.title;
             document.getElementById('currentArtist').innerText = track.uploader;
             document.getElementById('currentArt').src = track.thumbnail;
             playerBar.classList.add('active');
-            playPauseBtn.innerText = '...'; 
-
+            
             audio.src = `/stream?id=${track.id}`;
             
+            // The play promise will resolve quickly, but the actual playback depends on the stream.
+            // We rely on the 'canplay' event to know when the stream is ready.
             audio.play().then(() => {
-                playPauseBtn.innerText = '⏸';
+                // If it plays immediately (e.g., from cache), the 'canplay' listener will run
+                // and correctly set the '⏸' icon.
                 updateMediaSession(track);
             }).catch(e => {
                 console.error("Playback failed", e);
-                playPauseBtn.innerText = '▶';
+                // On failure, re-enable and show play icon
+                playPauseBtn.disabled = false;
+                playPauseBtn.innerHTML = '▶';
+                playPauseBtn.classList.remove('play-btn-loading');
+                audio.removeEventListener('canplay', handleCanPlay);
                 alert("Could not play audio. Try a different track.");
             });
         }
@@ -278,9 +311,19 @@
         }
 
         // Keep button synced with audio state
-        audio.addEventListener('playing', () => { playPauseBtn.innerText = '⏸'; });
-        audio.addEventListener('pause', () => { playPauseBtn.innerText = '▶'; });
-        audio.addEventListener('ended', () => { playPauseBtn.innerText = '▶'; });
+        audio.addEventListener('playing', () => { playPauseBtn.innerHTML = '⏸'; });
+        audio.addEventListener('pause', () => { playPauseBtn.innerHTML = '▶'; });
+        audio.addEventListener('ended', () => { playPauseBtn.innerHTML = '▶'; });
+        
+        // --- NEW: Handle errors during loading ---
+        audio.addEventListener('error', (e) => { 
+            console.error("Audio Load Error:", e);
+            playPauseBtn.disabled = false;
+            playPauseBtn.innerHTML = '▶';
+            playPauseBtn.classList.remove('play-btn-loading');
+            audio.removeEventListener('canplay', handleCanPlay);
+            alert("An error occurred while loading the audio stream.");
+        });
 
     </script>
 </body>
